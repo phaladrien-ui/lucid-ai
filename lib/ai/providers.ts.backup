@@ -1,0 +1,71 @@
+import { createDeepSeek } from "@ai-sdk/deepseek";
+import {
+  customProvider,
+  extractReasoningMiddleware,
+  wrapLanguageModel,
+} from "ai";
+import { isTestEnvironment } from "../constants";
+
+const THINKING_SUFFIX_REGEX = /-thinking$/;
+
+// Crée une instance DeepSeek
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY ?? "",
+  baseURL: "https://api.deepseek.com/v1", // Optionnel si tu veux personnaliser
+});
+
+export const myProvider = isTestEnvironment
+  ? (() => {
+      const {
+        artifactModel,
+        chatModel,
+        reasoningModel,
+        titleModel,
+      } = require("./models.mock");
+      return customProvider({
+        languageModels: {
+          "chat-model": chatModel,
+          "chat-model-reasoning": reasoningModel,
+          "title-model": titleModel,
+          "artifact-model": artifactModel,
+        },
+      });
+    })()
+  : null;
+
+export function getLanguageModel(modelId: string) {
+  if (isTestEnvironment && myProvider) {
+    return myProvider.languageModel(modelId);
+  }
+
+  const isReasoningModel =
+    modelId.endsWith("-thinking") ||
+    (modelId.includes("reasoning") && !modelId.includes("non-reasoning"));
+
+  if (isReasoningModel) {
+    const deepseekModelId = modelId.replace(THINKING_SUFFIX_REGEX, "");
+
+    return wrapLanguageModel({
+      model: deepseek(deepseekModelId),
+      middleware: extractReasoningMiddleware({ tagName: "thinking" }),
+    });
+  }
+
+  return deepseek(modelId);
+}
+
+export function getTitleModel() {
+  if (isTestEnvironment && myProvider) {
+    return myProvider.languageModel("title-model");
+  }
+  // Utilise DeepSeek pour le titre aussi
+  return deepseek("deepseek-chat");
+}
+
+export function getArtifactModel() {
+  if (isTestEnvironment && myProvider) {
+    return myProvider.languageModel("artifact-model");
+  }
+  // Utilise DeepSeek pour les artefacts aussi
+  return deepseek("deepseek-chat");
+}
