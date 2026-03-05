@@ -23,9 +23,10 @@ import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
 
-// --- NOUVEAU COMPOSANT LOGO ORION ---
+// --- LOGO ORION ---
+// --- LOGO ORION FIN ET SUBTIL (Biome-compliant) ---
 const OrionLogo = ({
-  size = 18,
+  size = 16,
   className,
 }: {
   size?: number;
@@ -34,15 +35,17 @@ const OrionLogo = ({
   <svg
     className={className}
     height={size}
+    shapeRendering="geometricPrecision" // Maintient la netteté du trait fin
     viewBox="0 0 200 200"
     width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
     <defs>
-      <filter height="200%" id="glow-logo" width="200%" x="-50%" y="-50%">
-        <feGaussianBlur result="blur" stdDeviation="12" />
+      {/* Filtre de lueur doux et diffus pour le mode sombre */}
+      <filter height="160%" id="glow-logo" width="160%" x="-30%" y="-30%">
+        <feGaussianBlur result="coloredBlur" stdDeviation="5" />
         <feMerge>
-          <feMergeNode in="blur" />
+          <feMergeNode in="coloredBlur" />
           <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
@@ -52,8 +55,8 @@ const OrionLogo = ({
       cx="100"
       cy="100"
       fill="none"
-      r="75"
-      strokeWidth="20"
+      r="85" // Légèrement plus grand pour équilibrer la finesse
+      strokeWidth="12" // Trait fin et élégant
     />
   </svg>
 );
@@ -61,23 +64,21 @@ const OrionLogo = ({
 const PurePreviewMessage = ({
   addToolApprovalResponse,
   chatId,
-  message,
-  vote,
   isLoading,
-  setMessages,
-  regenerate,
   isReadonly,
-  requiresScrollPadding: _requiresScrollPadding,
+  message,
+  regenerate,
+  setMessages,
+  vote,
 }: {
   addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
   chatId: string;
-  message: ChatMessage;
-  vote: Vote | undefined;
   isLoading: boolean;
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
-  requiresScrollPadding: boolean;
+  message: ChatMessage;
+  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
+  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
+  vote: Vote | undefined;
 }) => {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -99,10 +100,9 @@ const PurePreviewMessage = ({
           "justify-start": message.role === "assistant",
         })}
       >
-        {/* LOGO MODIFIÉ ICI POUR L'ASSISTANT */}
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border shadow-sm">
-            <OrionLogo size={18} />
+            <OrionLogo size={20} />
           </div>
         )}
 
@@ -130,8 +130,8 @@ const PurePreviewMessage = ({
               {attachmentsFromMessage.map((attachment) => (
                 <PreviewAttachment
                   attachment={{
-                    name: attachment.filename ?? "file",
                     contentType: attachment.mediaType,
+                    name: attachment.filename ?? "file",
                     url: attachment.url,
                   }}
                   key={attachment.url}
@@ -206,13 +206,6 @@ const PurePreviewMessage = ({
 
             if (type === "tool-getWeather") {
               const { toolCallId, state } = part;
-              const approvalId = (part as { approval?: { id: string } })
-                .approval?.id;
-              const isDenied =
-                state === "output-denied" ||
-                (state === "approval-responded" &&
-                  (part as { approval?: { approved?: boolean } }).approval
-                    ?.approved === false);
               const widthClass = "w-[min(100%,450px)]";
 
               if (state === "output-available") {
@@ -223,75 +216,12 @@ const PurePreviewMessage = ({
                 );
               }
 
-              if (isDenied) {
-                return (
-                  <div className={widthClass} key={toolCallId}>
-                    <Tool className="w-full" defaultOpen={true}>
-                      <ToolHeader
-                        state="output-denied"
-                        type="tool-getWeather"
-                      />
-                      <ToolContent>
-                        <div className="px-4 py-3 text-muted-foreground text-sm">
-                          Weather lookup was denied.
-                        </div>
-                      </ToolContent>
-                    </Tool>
-                  </div>
-                );
-              }
-
-              if (state === "approval-responded") {
-                return (
-                  <div className={widthClass} key={toolCallId}>
-                    <Tool className="w-full" defaultOpen={true}>
-                      <ToolHeader state={state} type="tool-getWeather" />
-                      <ToolContent>
-                        <ToolInput input={part.input} />
-                      </ToolContent>
-                    </Tool>
-                  </div>
-                );
-              }
-
               return (
                 <div className={widthClass} key={toolCallId}>
                   <Tool className="w-full" defaultOpen={true}>
                     <ToolHeader state={state} type="tool-getWeather" />
                     <ToolContent>
-                      {(state === "input-available" ||
-                        state === "approval-requested") && (
-                        <ToolInput input={part.input} />
-                      )}
-                      {state === "approval-requested" && approvalId && (
-                        <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-                          <button
-                            className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
-                            onClick={() => {
-                              addToolApprovalResponse({
-                                id: approvalId,
-                                approved: false,
-                                reason: "User denied weather lookup",
-                              });
-                            }}
-                            type="button"
-                          >
-                            Deny
-                          </button>
-                          <button
-                            className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-                            onClick={() => {
-                              addToolApprovalResponse({
-                                id: approvalId,
-                                approved: true,
-                              });
-                            }}
-                            type="button"
-                          >
-                            Allow
-                          </button>
-                        </div>
-                      )}
+                      <ToolInput input={part.input} />
                     </ToolContent>
                   </Tool>
                 </div>
@@ -300,18 +230,9 @@ const PurePreviewMessage = ({
 
             if (type === "tool-createDocument") {
               const { toolCallId } = part;
-
               if (part.output && "error" in part.output) {
-                return (
-                  <div
-                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                    key={toolCallId}
-                  >
-                    Error creating document: {String(part.output.error)}
-                  </div>
-                );
+                return null;
               }
-
               return (
                 <DocumentPreview
                   isReadonly={isReadonly}
@@ -323,23 +244,15 @@ const PurePreviewMessage = ({
 
             if (type === "tool-updateDocument") {
               const { toolCallId } = part;
-
               if (part.output && "error" in part.output) {
-                return (
-                  <div
-                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
-                    key={toolCallId}
-                  >
-                    Error updating document: {String(part.output.error)}
-                  </div>
-                );
+                return null;
               }
-
               return (
                 <div className="relative" key={toolCallId}>
                   <DocumentPreview
                     args={{ ...part.output, isUpdate: true }}
                     isReadonly={isReadonly}
+                    key={toolCallId}
                     result={part.output}
                   />
                 </div>
@@ -360,9 +273,9 @@ const PurePreviewMessage = ({
                       <ToolOutput
                         errorText={undefined}
                         output={
-                          "error" in part.output ? (
-                            <div className="rounded border p-2 text-red-500">
-                              Error: {String(part.output.error)}
+                          part.output && "error" in part.output ? (
+                            <div className="p-2 text-red-500 text-sm">
+                              {part.output.error}
                             </div>
                           ) : (
                             <DocumentToolResult
@@ -408,10 +321,9 @@ export const ThinkingMessage = () => {
       data-testid="message-assistant-loading"
     >
       <div className="flex items-start justify-start gap-3">
-        {/* LOGO MODIFIÉ ICI POUR LE MODE THINKING AVEC ANIMATION */}
-        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
+        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border shadow-sm">
           <div className="animate-pulse">
-            <OrionLogo className="opacity-80" size={18} />
+            <OrionLogo className="opacity-90" size={20} />
           </div>
         </div>
 
