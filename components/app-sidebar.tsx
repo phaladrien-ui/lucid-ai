@@ -79,10 +79,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
-  // Raccourci clavier fonctionnel (Ctrl+K)
+  // Raccourci clavier (Ctrl+K)
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Supporte Ctrl+K (Windows/Linux) et Cmd+K (Mac) pour être universel
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpenMobile(false);
@@ -170,7 +169,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarHeader>
 
         <SidebarContent>
-          {/* SECTION 1: QUICK ACTIONS */}
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -188,9 +186,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                         <PlusIcon size={18} />
                         <span className="font-medium">New chat</span>
                       </div>
-                      <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground/90 shadow-sm transition-colors">
-                        Ctrl+K
-                      </kbd>
+                      <span className="hidden sm:block text-[9px] font-mono text-muted-foreground/40 tracking-widest">
+                        CTRL+K
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -198,7 +196,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* SECTION 2: PROJECTS */}
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
               Projects
@@ -220,7 +217,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* SECTION 3: CHATS */}
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
               Chats
