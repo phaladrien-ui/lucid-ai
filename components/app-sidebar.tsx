@@ -65,13 +65,49 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           <SidebarMenu>
             <div className="flex flex-row items-center justify-between">
               <Link
-                className="flex flex-row items-center gap-3"
+                className="flex flex-row items-center gap-2" // Ajout d'un gap pour l'espace logo/texte
                 href="/"
                 onClick={() => {
                   setOpenMobile(false);
                 }}
               >
-                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
+                {/* --- LOGO ORION DYNAMIQUE --- */}
+                <svg
+                  className="h-6 w-6 text-black dark:text-white"
+                  height="200"
+                  viewBox="0 0 200 200"
+                  width="200"
+                  xmlns="http://www.w3.org/2000/svg" // Gère la couleur via Tailwind
+                >
+                  <defs>
+                    <filter
+                      height="200%"
+                      id="glow"
+                      width="200%"
+                      x="-50%"
+                      y="-50%"
+                    >
+                      <feGaussianBlur result="coloredBlur" stdDeviation="5" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+
+                  <circle
+                    className="dark:[filter:url(#glow)]"
+                    cx="100"
+                    cy="100"
+                    fill="none" // Utilise la couleur du texte (noir ou blanc)
+                    r="75" // Un peu plus épais pour que le glow soit visible en petit format
+                    stroke="currentColor"
+                    strokeWidth="12" // Applique le filtre UNIQUEMENT en mode sombre
+                  />
+                </svg>
+                {/* ---------------------------- */}
+
+                <span className="cursor-pointer rounded-md px-1 font-semibold text-lg hover:bg-muted">
                   Orion
                 </span>
               </Link>
@@ -122,6 +158,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
       </Sidebar>
 
+      {/* ... reste du code (AlertDialog) inchangé ... */}
       <AlertDialog
         onOpenChange={setShowDeleteAllDialog}
         open={showDeleteAllDialog}
