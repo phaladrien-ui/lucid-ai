@@ -1,0 +1,23 @@
+<svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    /* 1. Style par défaut (Thème Clair) */
+    circle { 
+      stroke: black; 
+      fill: none; 
+      stroke-width: 20; 
+      transition: stroke 0.3s ease; /* Optionnel : transition douce */
+    }
+
+    /* 2. Style automatique (Thème Sombre / Black) */
+    /* Le navigateur détecte le changement de thème système en temps réel */
+    @media (prefers-color-scheme: dark) {
+      circle { 
+        stroke: white; 
+        /* Lueur blanche (Glow) */
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+      }
+    }
+  </style>
+  
+  <circle cx="100" cy="100" r="75" />
+</svg>
