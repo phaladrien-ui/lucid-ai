@@ -1,4 +1,5 @@
 "use client";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useState } from "react";
 import type { Vote } from "@/lib/db/schema";
@@ -16,12 +17,46 @@ import {
   ToolInput,
   ToolOutput,
 } from "./elements/tool";
-import { SparklesIcon } from "./icons";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
+
+// --- NOUVEAU COMPOSANT LOGO ORION ---
+const OrionLogo = ({
+  size = 18,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) => (
+  <svg
+    className={className}
+    height={size}
+    viewBox="0 0 200 200"
+    width={size}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <filter height="200%" id="glow-logo" width="200%" x="-50%" y="-50%">
+        <feGaussianBlur result="blur" stdDeviation="12" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <circle
+      className="stroke-black dark:stroke-white dark:[filter:url(#glow-logo)] transition-all duration-300"
+      cx="100"
+      cy="100"
+      fill="none"
+      r="75"
+      strokeWidth="20"
+    />
+  </svg>
+);
 
 const PurePreviewMessage = ({
   addToolApprovalResponse,
@@ -64,9 +99,10 @@ const PurePreviewMessage = ({
           "justify-start": message.role === "assistant",
         })}
       >
+        {/* LOGO MODIFIÉ ICI POUR L'ASSISTANT */}
         {message.role === "assistant" && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <SparklesIcon size={14} />
+          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border shadow-sm">
+            <OrionLogo size={18} />
           </div>
         )}
 
@@ -372,9 +408,10 @@ export const ThinkingMessage = () => {
       data-testid="message-assistant-loading"
     >
       <div className="flex items-start justify-start gap-3">
+        {/* LOGO MODIFIÉ ICI POUR LE MODE THINKING AVEC ANIMATION */}
         <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
           <div className="animate-pulse">
-            <SparklesIcon size={14} />
+            <OrionLogo className="opacity-80" size={18} />
           </div>
         </div>
 
