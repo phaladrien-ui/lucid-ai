@@ -319,8 +319,8 @@ const PureToolbar = ({
   artifactKind: ArtifactKind;
 }) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
-  // Correction: utilisation de undefined au lieu de null pour permettre l'assignation
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  // Correction: initialisation avec undefined pour permettre l'assignation
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
