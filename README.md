@@ -1,5 +1,5 @@
 <a href="#">
-  <img alt="Neural OS" src="app/(chat)/opengraph-image.png">
+  <img alt="Neural OS" src="app/(chat)/Orion_platform.png">
   <h1 align="center">Neural OS | Infrastructure Management</h1>
 </a>
 
