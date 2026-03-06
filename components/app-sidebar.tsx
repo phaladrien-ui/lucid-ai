@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
+import { OrionLogo } from "@/components/icons/orion-logo";
 import {
   getChatHistoryPaginationKey,
   SidebarHistory,
@@ -43,46 +44,23 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-// --- LOGO ORION ---
-const OrionLogo = ({ size = 24 }: { size?: number }) => (
-  <svg
-    height={size}
-    shapeRendering="geometricPrecision"
-    viewBox="0 0 200 200"
-    width={size}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <filter height="200%" id="glow-sidebar" width="200%" x="-50%" y="-50%">
-        <feGaussianBlur result="coloredBlur" stdDeviation="5" />
-        <feMerge>
-          <feMergeNode in="coloredBlur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-    <circle
-      className="stroke-black dark:stroke-white dark:[filter:url(#glow-sidebar)]"
-      cx="100"
-      cy="100"
-      fill="none"
-      r="85"
-      stroke="currentColor"
-      strokeWidth="10"
-    />
-  </svg>
-);
-
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Raccourci clavier (Ctrl+K)
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        if (
+          document.activeElement instanceof HTMLInputElement ||
+          document.activeElement instanceof HTMLTextAreaElement
+        ) {
+          return;
+        }
         e.preventDefault();
         setOpenMobile(false);
         router.push("/");
@@ -94,19 +72,33 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     return () => document.removeEventListener("keydown", down);
   }, [router, setOpenMobile]);
 
-  const handleDeleteAll = () => {
+  const handleDeleteAll = async () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setIsDeleting(true);
     const deletePromise = fetch("/api/history", { method: "DELETE" });
+
     toast.promise(deletePromise, {
       loading: "Deleting all chats...",
       success: () => {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
         setShowDeleteAllDialog(false);
+        setIsDeleting(false);
         router.replace("/");
         router.refresh();
         return "All chats deleted successfully";
       },
       error: "Failed to delete all chats",
     });
+
+    try {
+      await deletePromise;
+    } catch {
+      // Correction Biome : suppression de la variable 'error' inutilisée
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -243,9 +235,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+              onClick={handleDeleteAll}
+            >
+              {isDeleting ? "Deleting..." : "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

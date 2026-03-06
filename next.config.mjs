@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+// next.config.mjs
 import { withBotId } from "botid/next/config";
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   cacheComponents: true,
   images: {
     remotePatterns: [
