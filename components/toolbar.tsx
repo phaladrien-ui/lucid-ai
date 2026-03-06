@@ -1,4 +1,5 @@
 "use client";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
 import cx from "classnames";
 import {
@@ -319,13 +320,14 @@ const PureToolbar = ({
   artifactKind: ArtifactKind;
 }) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
-  // CORRECTION ICI : Ajout de (undefined) pour React 19
+  // FIX 1: Initialisation explicite pour React 19
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  useOnClickOutside(toolbarRef, () => {
+  // FIX 2: Cast explicite de toolbarRef pour useOnClickOutside (compatibilité types React 19)
+  useOnClickOutside(toolbarRef as React.RefObject<HTMLDivElement>, () => {
     setIsToolbarVisible(false);
     setSelectedTool(null);
   });
