@@ -48,28 +48,24 @@ export function SidebarFooter({ user }: { user: User | undefined }) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
                   <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">
-                    ⌘1
+                    Ctrl+1
                   </kbd>
                   <span className="text-muted-foreground">CEO AI</span>
                 </div>
                 
                 <div className="flex items-center justify-between text-sm">
                   <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">
-                    ⌘2
+                    Ctrl+2
                   </kbd>
                   <span className="text-muted-foreground">CTO AI</span>
                 </div>
                 
                 <div className="flex items-center justify-between text-sm">
                   <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">
-                    ⌘N
+                    Ctrl+N
                   </kbd>
                   <span className="text-muted-foreground">New Session</span>
                 </div>
-              </div>
-              
-              <div className="mt-2 text-[10px] text-muted-foreground/50 text-center border-t pt-2">
-                ⌘ = Ctrl on Windows
               </div>
             </div>
           )}
