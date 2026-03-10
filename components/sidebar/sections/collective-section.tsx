@@ -31,7 +31,6 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+N pour New Session
       if (e.ctrlKey && e.key === "n") {
         e.preventDefault();
         if (permissions.canUseNewSession) {
@@ -39,8 +38,6 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
           router.refresh();
         }
       }
-
-      // Ctrl+K déjà utilisé dans l'en-tête
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -57,41 +54,26 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
     <SidebarGroup>
       <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         Collective Suite
-        <span className="ml-auto text-xs font-normal text-muted-foreground/50">
-          Ctrl+N
-        </span>
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
             {permissions.canUseNewSession ? (
-              <SidebarMenuButton
-                asChild
-                className="justify-between"
-                onClick={handleClick}
-              >
+              <SidebarMenuButton asChild onClick={handleClick}>
                 <Link className="flex items-center gap-2" href="/">
                   <UsersIcon size={16} />
                   <span className="text-sm font-medium">New Session</span>
-                  <span className="text-xs text-muted-foreground/50 ml-auto">
-                    Ctrl+N
-                  </span>
                 </Link>
               </SidebarMenuButton>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarMenuButton
-                    className="opacity-50 cursor-not-allowed text-muted-foreground justify-between"
+                    className="opacity-50 cursor-not-allowed text-muted-foreground"
                     onClick={(e) => e.preventDefault()}
                   >
-                    <div className="flex items-center gap-2">
-                      <UsersIcon size={16} />
-                      <span className="text-sm font-medium">New Session</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground/50">
-                      Ctrl+N
-                    </span>
+                    <UsersIcon size={16} />
+                    <span className="text-sm font-medium">New Session</span>
                   </SidebarMenuButton>
                 </TooltipTrigger>
                 <TooltipContent side="right">

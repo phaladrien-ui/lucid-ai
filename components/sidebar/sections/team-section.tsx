@@ -23,16 +23,13 @@ export function TeamSection({ permissions }: TeamSectionProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+1 pour CEO AI
       if (e.ctrlKey && e.key === "1") {
         e.preventDefault();
-        router.push("/ceo"); // Adapte le chemin
+        router.push("/ceo");
       }
-
-      // Ctrl+2 pour CTO AI (seulement si visible)
       if (e.ctrlKey && e.key === "2" && permissions.canSeeCto) {
         e.preventDefault();
-        router.push("/cto"); // Adapte le chemin
+        router.push("/cto");
       }
     };
 
@@ -44,16 +41,12 @@ export function TeamSection({ permissions }: TeamSectionProps) {
     <SidebarGroup>
       <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         Team
-        <span className="ml-auto text-xs font-normal text-muted-foreground/50">
-          Ctrl+1/2
-        </span>
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {/* CEO AI */}
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="h-9 w-full transition-colors cursor-pointer justify-between"
+              className="h-9 w-full transition-colors cursor-pointer"
               onClick={() => router.push("/ceo")}
             >
               <div className="flex items-center gap-3">
@@ -65,15 +58,13 @@ export function TeamSection({ permissions }: TeamSectionProps) {
                   CEO AI
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground/50">Ctrl+1</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* CTO AI (conditionnel) */}
           {permissions.canSeeCto && (
             <SidebarMenuItem>
               <SidebarMenuButton
-                className="h-9 w-full transition-colors cursor-pointer justify-between"
+                className="h-9 w-full transition-colors cursor-pointer"
                 onClick={() => router.push("/cto")}
               >
                 <div className="flex items-center gap-3">
@@ -82,7 +73,6 @@ export function TeamSection({ permissions }: TeamSectionProps) {
                     CTO AI
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground/50">Ctrl+2</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
