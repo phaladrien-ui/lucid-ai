@@ -41,6 +41,7 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             {permissions.canUseNewSession ? (
+              // Version normale (connecté)
               <SidebarMenuButton asChild onClick={handleClick}>
                 <Link className="flex items-center gap-2" href="/">
                   <UsersIcon size={16} />
@@ -48,6 +49,7 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
                 </Link>
               </SidebarMenuButton>
             ) : (
+              // Version grisée avec tooltip (non connecté)
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarMenuButton
@@ -58,7 +60,7 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
                     <span className="text-sm font-medium">New Session</span>
                   </SidebarMenuButton>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   Connectez-vous pour créer une nouvelle session
                 </TooltipContent>
               </Tooltip>

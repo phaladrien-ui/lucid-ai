@@ -1,5 +1,8 @@
+"use client";
+
 import { FolderRootIcon, RocketIcon, UserPlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -24,6 +27,17 @@ interface ResourcesSectionProps {
 }
 
 export function ResourcesSection({ permissions }: ResourcesSectionProps) {
+  const router = useRouter();
+
+  const handleRecruitmentClick = (e: React.MouseEvent) => {
+    if (!permissions.isConnected) {
+      e.preventDefault();
+      // Rediriger vers la page de connexion avec retour
+      router.push("/login?redirect=/recruitment");
+    }
+    // Si connecté, le Link gère la navigation normalement
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -31,7 +45,7 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {/* Workspace - grisé si non connecté */}
+          {/* WORKSPACE - grisé si non connecté */}
           <SidebarMenuItem>
             {permissions.canUseWorkspace ? (
               <SidebarMenuButton asChild>
@@ -43,19 +57,22 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <SidebarMenuButton className="opacity-50 cursor-not-allowed text-muted-foreground">
+                  <SidebarMenuButton
+                    className="opacity-50 cursor-not-allowed text-muted-foreground"
+                    onClick={(e) => e.preventDefault()}
+                  >
                     <FolderRootIcon size={16} />
                     <span className="text-sm font-medium">Workspace</span>
                   </SidebarMenuButton>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   Connectez-vous pour accéder à votre workspace
                 </TooltipContent>
               </Tooltip>
             )}
           </SidebarMenuItem>
 
-          {/* Deployments - grisé si non connecté */}
+          {/* DEPLOYMENTS - grisé si non connecté */}
           <SidebarMenuItem>
             {permissions.canUseDeployments ? (
               <SidebarMenuButton asChild>
@@ -67,31 +84,28 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <SidebarMenuButton className="opacity-50 cursor-not-allowed text-muted-foreground">
+                  <SidebarMenuButton
+                    className="opacity-50 cursor-not-allowed text-muted-foreground"
+                    onClick={(e) => e.preventDefault()}
+                  >
                     <RocketIcon size={16} />
                     <span className="text-sm font-medium">Deployments</span>
                   </SidebarMenuButton>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   Connectez-vous pour déployer votre projet
                 </TooltipContent>
               </Tooltip>
             )}
           </SidebarMenuItem>
 
-          {/* Recruitment - TOUJOURS visible et cliquable */}
+          {/* RECRUITMENT - toujours visible et cliquable */}
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link
                 className="flex items-center gap-2"
                 href="/recruitment"
-                onClick={(e) => {
-                  if (!permissions.isConnected) {
-                    e.preventDefault();
-                    // Rediriger vers login ou montrer un modal
-                    window.location.href = "/login?redirect=/recruitment";
-                  }
-                }}
+                onClick={handleRecruitmentClick}
               >
                 <UserPlusIcon size={16} />
                 <span className="text-sm font-medium">Recruitment</span>
