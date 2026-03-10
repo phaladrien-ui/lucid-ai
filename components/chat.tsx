@@ -29,7 +29,7 @@ import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { getChatHistoryPaginationKey } from "./sidebar/sidebar-history";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -120,7 +120,10 @@ export function Chat({
           );
 
         // CORRECTION : Utiliser un modèle valide de la liste
-        const validModelId = chatModels.length > 0 ? chatModels[0].id : "anthropic/claude-haiku-4.5";
+        const validModelId =
+          chatModels.length > 0
+            ? chatModels[0].id
+            : "anthropic/claude-haiku-4.5";
 
         return {
           body: {
