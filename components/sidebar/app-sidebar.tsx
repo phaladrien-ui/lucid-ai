@@ -52,9 +52,12 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </UISidebarHeader>
 
         <SidebarContent>
+          {/* Sections dans l'ordre voulu */}
           <TeamSection permissions={permissions} />
           <CollectiveSection permissions={permissions} />
           <OperationsSection user={user} />
+          {/* Espace flexible pour pousser Resources en bas */}
+          <div className="flex-1" />
           <ResourcesSection permissions={permissions} />
         </SidebarContent>
 
