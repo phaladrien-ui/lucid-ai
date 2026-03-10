@@ -66,7 +66,7 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
                   </SidebarMenuButton>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  Connectez-vous pour accéder à votre workspace
+                  Sign in to access your workspace
                 </TooltipContent>
               </Tooltip>
             )}
@@ -93,7 +93,7 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
                   </SidebarMenuButton>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  Connectez-vous pour déployer votre projet
+                  Sign in to deploy your project
                 </TooltipContent>
               </Tooltip>
             )}

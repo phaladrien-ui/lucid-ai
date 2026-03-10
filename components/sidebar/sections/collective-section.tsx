@@ -61,7 +61,7 @@ export function CollectiveSection({ permissions }: CollectiveSectionProps) {
                   </SidebarMenuButton>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  Connectez-vous pour créer une nouvelle session
+                  Sign in to create a new session
                 </TooltipContent>
               </Tooltip>
             )}
