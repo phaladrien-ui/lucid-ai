@@ -39,32 +39,24 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="group-data-[side=left]:border-r-0">
-        <UISidebarHeader className="pt-4">
+      <Sidebar className="group-data-[side=left]:border-r-0 flex flex-col h-screen">
+        <UISidebarHeader className="pt-4 flex-shrink-0">
           <SidebarHeader 
             user={user} 
             onDeleteAll={() => setShowDeleteAllDialog(true)}
           />
         </UISidebarHeader>
 
-        {/* Structure avec hauteur calculée pour permettre le défilement */}
-        <div className="flex flex-col h-[calc(100vh-8rem)]">
-          {/* Sections du haut (Team + Collective) */}
-          <div className="flex-shrink-0">
-            <TeamSection permissions={permissions} />
-            <CollectiveSection permissions={permissions} />
-          </div>
-
-          {/* Section des messages - défilante si trop longue */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <OperationsSection user={user} />
-          </div>
-
-          {/* Resources - fixe en bas */}
-          <div className="flex-shrink-0">
-            <ResourcesSection permissions={permissions} />
-          </div>
-        </div>
+        {/* Contenu principal qui peut défiler */}
+        <SidebarContent className="flex-1 overflow-y-auto">
+          {/* Sections dans l'ordre voulu */}
+          <TeamSection permissions={permissions} />
+          <CollectiveSection permissions={permissions} />
+          <OperationsSection user={user} />
+          {/* Espace flexible pour pousser Resources en bas du contenu défilant */}
+          <div className="flex-1 min-h-4" />
+          <ResourcesSection permissions={permissions} />
+        </SidebarContent>
 
         <SidebarFooter user={user} />
       </Sidebar>
