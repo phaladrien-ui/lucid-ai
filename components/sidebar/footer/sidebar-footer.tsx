@@ -16,9 +16,8 @@ export function SidebarFooter({ user }: { user: User | undefined }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
 
   return (
-    <UISidebarFooter className="p-0"> {/* ← Supprime le padding par défaut */}
+    <UISidebarFooter className="p-0 border-t border-sidebar-border">
       <div className="w-full">
-        {/* Barre principale avec les mêmes padding que le header */}
         <div className="flex items-center justify-between px-2 py-2">
           <div
             className="relative"
@@ -40,9 +39,8 @@ export function SidebarFooter({ user }: { user: User | undefined }) {
               </TooltipContent>
             </Tooltip>
 
-            {/* Tableau des raccourcis */}
             {showShortcuts && (
-              <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-popover rounded-lg shadow-lg border border-border animate-in fade-in slide-in-from-bottom-2">
+              <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-popover rounded-lg shadow-lg border border-border animate-in fade-in slide-in-from-bottom-2 z-50">
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   Keyboard Shortcuts
                 </h4>

@@ -1,32 +1,40 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import type { User } from "next-auth";
-import { useState } from "react";
-import {
-  Sidebar,
-  SidebarHeader as UISidebarHeader,
-} from "@/components/ui/sidebar";
-import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
-import { DeleteAllDialog } from "./delete-all-dialog";
-import { SidebarFooter } from "./footer/sidebar-footer";
+import { Sidebar, SidebarContent, SidebarHeader as UISidebarHeader } from "@/components/ui/sidebar";
+import { SidebarHeader } from "./sidebar-header";
+import { TeamSection } from "./sections/team-section";
 import { CollectiveSection } from "./sections/collective-section";
 import { OperationsSection } from "./sections/operations-section";
 import { ResourcesSection } from "./sections/resources-section";
-import { TeamSection } from "./sections/team-section";
-import { SidebarHeader } from "./sidebar-header";
+import { SidebarFooter } from "./footer/sidebar-footer";
+import { DeleteAllDialog } from "./delete-all-dialog";
+import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const permissions = useSidebarPermissions(user);
+
+  // Détecter le mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleDeleteAll = async () => {
     if (isDeleting) {
       return;
     }
-
+    
     setIsDeleting(true);
     try {
       await fetch("/api/history", { method: "DELETE" });
@@ -44,21 +52,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     <>
       <Sidebar className="group-data-[side=left]:border-r-0">
         <UISidebarHeader className="pt-4">
-          <SidebarHeader
+          <SidebarHeader 
+            user={user} 
             onDeleteAll={() => setShowDeleteAllDialog(true)}
-            user={user}
           />
         </UISidebarHeader>
 
-        {/* Structure en colonne avec sections fixes et défilante */}
-        <div className="flex flex-col h-[calc(100vh-8rem)]">
+        {/* Structure adaptative */}
+        <div className={`flex flex-col ${isMobile ? 'h-full' : 'h-[calc(100vh-8rem)]'}`}>
           {/* Sections fixes en haut */}
           <div className="flex-shrink-0">
             <TeamSection permissions={permissions} />
             <CollectiveSection permissions={permissions} />
           </div>
 
-          {/* Section des messages - défilante */}
+          {/* Section des messages - défilante avec hauteur adaptative */}
           <div className="flex-1 overflow-y-auto min-h-0">
             <OperationsSection user={user} />
           </div>
@@ -72,11 +80,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarFooter user={user} />
       </Sidebar>
 
-      <DeleteAllDialog
-        isDeleting={isDeleting}
-        onDelete={handleDeleteAll}
-        onOpenChange={setShowDeleteAllDialog}
+      <DeleteAllDialog 
         open={showDeleteAllDialog}
+        onOpenChange={setShowDeleteAllDialog}
+        onDelete={handleDeleteAll}
+        isDeleting={isDeleting}
       />
     </>
   );
