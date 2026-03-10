@@ -47,16 +47,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           />
         </UISidebarHeader>
 
-        {/* Contenu principal qui peut défiler */}
-        <SidebarContent className="flex-1 overflow-y-auto">
-          {/* Sections dans l'ordre voulu */}
+        {/* Sections fixes du haut */}
+        <div className="flex-shrink-0 px-2">
           <TeamSection permissions={permissions} />
           <CollectiveSection permissions={permissions} />
+        </div>
+
+        {/* Zone défilante pour l'historique uniquement */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-2">
           <OperationsSection user={user} />
-          {/* Espace flexible pour pousser Resources en bas du contenu défilant */}
-          <div className="flex-1 min-h-4" />
+        </div>
+
+        {/* Section fixe du bas */}
+        <div className="flex-shrink-0 px-2">
           <ResourcesSection permissions={permissions} />
-        </SidebarContent>
+        </div>
 
         <SidebarFooter user={user} />
       </Sidebar>
