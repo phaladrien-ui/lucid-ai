@@ -6,8 +6,20 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useState } from "react";
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +38,21 @@ export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();
   const { data, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
+    signOut({ redirect: false }).then(() => {
+      setShowLoginPrompt(true);
+    });
+  };
 
   const handleAuthAction = () => {
     if (status === "loading") {
@@ -41,76 +66,125 @@ export function SidebarUserNav({ user }: { user: User }) {
     if (isGuest) {
       router.push("/login");
     } else {
-      // Déconnexion avec rechargement complet
-      signOut({ redirect: false }).then(() => {
-        window.location.href = "/";
-      });
+      handleLogout();
     }
   };
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {status === "loading" ? (
-              <SidebarMenuButton className="h-10 justify-between bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                <div className="flex flex-row gap-2">
-                  <div className="size-6 animate-pulse rounded-full bg-zinc-500/30" />
-                  <span className="animate-pulse rounded-md bg-zinc-500/30 text-transparent">
-                    Loading auth status
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              {status === "loading" ? (
+                <SidebarMenuButton className="h-10 justify-between bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+                  <div className="flex flex-row gap-2">
+                    <div className="size-6 animate-pulse rounded-full bg-zinc-500/30" />
+                    <span className="animate-pulse rounded-md bg-zinc-500/30 text-transparent">
+                      Loading auth status
+                    </span>
+                  </div>
+                  <div className="animate-spin text-zinc-500">
+                    <LoaderIcon />
+                  </div>
+                </SidebarMenuButton>
+              ) : (
+                <SidebarMenuButton
+                  className="h-10 bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  data-testid="user-nav-button"
+                >
+                  <Image
+                    alt={user.email ?? "User Avatar"}
+                    className="rounded-full"
+                    height={24}
+                    src={`https://avatar.vercel.sh/${user.email}`}
+                    width={24}
+                  />
+                  <span className="truncate" data-testid="user-email">
+                    {isGuest ? "Guest" : user?.email}
                   </span>
-                </div>
-                <div className="animate-spin text-zinc-500">
-                  <LoaderIcon />
-                </div>
-              </SidebarMenuButton>
-            ) : (
-              <SidebarMenuButton
-                className="h-10 bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                data-testid="user-nav-button"
-              >
-                <Image
-                  alt={user.email ?? "User Avatar"}
-                  className="rounded-full"
-                  height={24}
-                  src={`https://avatar.vercel.sh/${user.email}`}
-                  width={24}
-                />
-                <span className="truncate" data-testid="user-email">
-                  {isGuest ? "Guest" : user?.email}
-                </span>
-                <ChevronUp className="ml-auto" />
-              </SidebarMenuButton>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-popper-anchor-width)"
-            data-testid="user-nav-menu"
-            side="top"
-          >
-            <DropdownMenuItem
-              className="cursor-pointer"
-              data-testid="user-nav-item-theme"
-              onSelect={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-popper-anchor-width)"
+              data-testid="user-nav-menu"
+              side="top"
             >
-              {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild data-testid="user-nav-item-auth">
-              <button
-                className="w-full cursor-pointer"
-                onClick={handleAuthAction}
-                type="button"
+              <DropdownMenuItem
+                className="cursor-pointer"
+                data-testid="user-nav-item-theme"
+                onSelect={() =>
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
               >
-                {isGuest ? "Login to your account" : "Sign out"}
-              </button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+                {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild data-testid="user-nav-item-auth">
+                <button
+                  className="w-full cursor-pointer"
+                  onClick={handleAuthAction}
+                  type="button"
+                >
+                  {isGuest ? "Login to your account" : "Sign out"}
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+
+      {/* Modale de confirmation de déconnexion */}
+      <AlertDialog onOpenChange={setShowLogoutConfirm} open={showLogoutConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign out</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to sign out? You can always sign back in to
+              access your conversations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout}>
+              Sign out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modale d'invitation à se connecter (après déconnexion) */}
+      <AlertDialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Signed out successfully</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've been signed out. Would you like to sign in again to access
+              your account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="w-full"
+              onClick={() => {
+                setShowLoginPrompt(false);
+                router.push("/login");
+              }}
+            >
+              Sign in
+            </Button>
+            <Button
+              className="w-full"
+              onClick={() => setShowLoginPrompt(false)}
+              variant="outline"
+            >
+              Continue as guest
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
