@@ -21,6 +21,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -50,8 +57,20 @@ export function SidebarUserNav({ user }: { user: User }) {
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
     signOut({ redirect: false }).then(() => {
-      setShowLoginPrompt(true);
+      // Rechargement complet après déconnexion
+      window.location.href = "/";
     });
+  };
+
+  const handleLoginRedirect = () => {
+    setShowLoginPrompt(false);
+    router.push("/login");
+  };
+
+  const handleContinueAsGuest = () => {
+    setShowLoginPrompt(false);
+    // Rechargement pour revenir en mode invité
+    window.location.href = "/";
   };
 
   const handleAuthAction = () => {
@@ -156,35 +175,29 @@ export function SidebarUserNav({ user }: { user: User }) {
       </AlertDialog>
 
       {/* Modale d'invitation à se connecter (après déconnexion) */}
-      <AlertDialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Signed out successfully</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Signed out successfully</DialogTitle>
+            <DialogDescription>
               You've been signed out. Would you like to sign in again to access
               your account?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex flex-col gap-2">
-            <Button
-              className="w-full"
-              onClick={() => {
-                setShowLoginPrompt(false);
-                router.push("/login");
-              }}
-            >
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-4">
+            <Button className="w-full" onClick={handleLoginRedirect}>
               Sign in
             </Button>
             <Button
               className="w-full"
-              onClick={() => setShowLoginPrompt(false)}
+              onClick={handleContinueAsGuest}
               variant="outline"
             >
               Continue as guest
             </Button>
           </div>
-        </AlertDialogContent>
-      </AlertDialog>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
