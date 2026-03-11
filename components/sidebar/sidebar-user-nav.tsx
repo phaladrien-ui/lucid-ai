@@ -50,15 +50,33 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
+  const isAuthenticated = !isGuest && !!user;
 
-  // Vérifier au chargement si on vient de se déconnecter
+  // Vérifier au chargement si on doit afficher la modale de connexion
   useEffect(() => {
-    const justLoggedOut = sessionStorage.getItem("justLoggedOut");
-    if (justLoggedOut === "true" && !user) {
-      sessionStorage.removeItem("justLoggedOut");
-      setShowLoginPrompt(true);
+    // Attendre que la session soit chargée
+    if (status === "loading") {
+      return;
     }
-  }, [user]);
+
+    // Si l'utilisateur n'est PAS authentifié (invité ou pas de session)
+    if (!isAuthenticated) {
+      // Vérifier si on a déjà affiché la modale dans cette session
+      const hasSeenPrompt = sessionStorage.getItem("hasSeenLoginPrompt");
+
+      if (!hasSeenPrompt) {
+        // Petite temporisation pour laisser la page s'afficher d'abord
+        const timer = setTimeout(() => {
+          setShowLoginPrompt(true);
+          sessionStorage.setItem("hasSeenLoginPrompt", "true");
+        }, 500);
+
+        return () => {
+          clearTimeout(timer);
+        };
+      }
+    }
+  }, [status, isAuthenticated]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -67,8 +85,8 @@ export function SidebarUserNav({ user }: { user: User }) {
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
 
-    // Marquer qu'on vient de se déconnecter
-    sessionStorage.setItem("justLoggedOut", "true");
+    // Réinitialiser le flag pour que la modale réapparaisse au prochain chargement
+    sessionStorage.removeItem("hasSeenLoginPrompt");
 
     signOut({ redirect: false }).then(() => {
       // Rechargement complet après déconnexion
@@ -83,7 +101,8 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleContinueAsGuest = () => {
     setShowLoginPrompt(false);
-    // Rester en mode invité, pas de rechargement nécessaire
+    // On garde le flag pour ne pas réafficher tout de suite
+    // mais il reste en mémoire pour la session
   };
 
   const handleAuthAction = () => {
@@ -187,14 +206,14 @@ export function SidebarUserNav({ user }: { user: User }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modale d'invitation à se connecter (après déconnexion) */}
+      {/* Modale d'invitation à se connecter */}
       <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Signed out successfully</DialogTitle>
+            <DialogTitle>Welcome back!</DialogTitle>
             <DialogDescription>
-              You've been signed out. Would you like to sign in again to access
-              your account?
+              You're currently browsing as a guest. Sign in to access your
+              account and saved conversations.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 mt-4">
