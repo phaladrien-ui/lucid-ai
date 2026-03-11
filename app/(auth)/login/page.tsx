@@ -22,7 +22,7 @@ export default function Page() {
 
   const { update: updateSession } = useSession();
 
-  // Fonction pour notifier les autres onglets - Mémorisée avec useCallback
+  // Fonction pour notifier les autres onglets - useCallback pour la stabilité
   const notifyAuthChange = useCallback(() => {
     if (typeof window !== "undefined") {
       const channel = new BroadcastChannel("auth_sync");
@@ -52,7 +52,7 @@ export default function Page() {
       // Force un rechargement complet après connexion réussie
       window.location.href = "/";
     }
-  }, [state.status, updateSession, notifyAuthChange]);
+  }, [state.status, updateSession, notifyAuthChange]); // ← Dépendances complètes
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);

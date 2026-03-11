@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -39,7 +39,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useAuthSync } from "@/hooks/use-auth-sync";
 import { guestRegex } from "@/lib/constants";
 
 export function SidebarUserNav({ user }: { user: User }) {
@@ -49,23 +48,22 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Activer la synchronisation entre onglets
-  useAuthSync();
-
   const isGuest = guestRegex.test(data?.user?.email ?? "");
   const isAuthenticated = !isGuest && !!user;
 
-  // Fonction pour notifier les autres onglets
-  const notifyAuthChange = () => {
-    const channel = new BroadcastChannel("auth_sync");
-    channel.postMessage({ type: "AUTH_CHANGED" });
-    channel.close();
-  };
+  // Fonction pour notifier les autres onglets - useCallback pour la stabilité
+  const notifyAuthChange = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const channel = new BroadcastChannel("auth_sync");
+      channel.postMessage({ type: "AUTH_CHANGED" });
+      channel.close();
+    }
+  }, []);
 
   // Vérifier au chargement si on doit afficher la modale de connexion
   useEffect(() => {
     if (status === "loading") {
-      return;
+      return; // ← Bloc if avec accolades
     }
 
     if (!isAuthenticated) {
@@ -77,9 +75,7 @@ export function SidebarUserNav({ user }: { user: User }) {
           sessionStorage.setItem("hasSeenLoginPrompt", "true");
         }, 500);
 
-        return () => {
-          clearTimeout(timer);
-        };
+        return () => clearTimeout(timer);
       }
     }
   }, [status, isAuthenticated]);

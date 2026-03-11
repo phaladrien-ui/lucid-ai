@@ -7,6 +7,11 @@ export function useAuthSync() {
   const { update } = useSession();
 
   useEffect(() => {
+    // Vérifier qu'on est bien côté client
+    if (typeof window === "undefined") {
+      return; // ← Bloc if avec accolades
+    }
+
     // Créer un canal de communication entre onglets
     const channel = new BroadcastChannel("auth_sync");
 
