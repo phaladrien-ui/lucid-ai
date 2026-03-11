@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useState } from "react";
-
 import {
   Sidebar,
   SidebarHeader as UISidebarHeader,
@@ -43,8 +42,8 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="flex flex-col h-screen group-data-[side=left]:border-r-0">
-        <UISidebarHeader className="flex-shrink-0 pt-4">
+      <Sidebar className="group-data-[side=left]:border-r-0 flex flex-col h-screen">
+        <UISidebarHeader className="pt-4 flex-shrink-0">
           <SidebarHeader
             onDeleteAll={() => setShowDeleteAllDialog(true)}
             user={user}
@@ -58,7 +57,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </div>
 
         {/* Zone défilante pour l'historique uniquement */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-2">
+        <div className="flex-1 overflow-y-auto min-h-0 px-2">
           <OperationsSection user={user} />
         </div>
 

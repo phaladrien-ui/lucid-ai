@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { LoaderIcon } from "@/components/icons"; // ← CORRIGÉ
-import { toast } from "@/components/toast"; // ← Attention, celui-ci aussi !
+import { LoaderIcon } from "@/components/icons";
+import { toast } from "@/components/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +28,25 @@ export function SidebarUserNav({ user }: { user: User }) {
   const { setTheme, resolvedTheme } = useTheme();
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
+
+  const handleAuthAction = () => {
+    if (status === "loading") {
+      toast({
+        type: "error",
+        description: "Checking authentication status, please try again!",
+      });
+      return;
+    }
+
+    if (isGuest) {
+      router.push("/login");
+    } else {
+      // Déconnexion avec rechargement complet
+      signOut({ redirect: false }).then(() => {
+        window.location.href = "/";
+      });
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -83,25 +102,7 @@ export function SidebarUserNav({ user }: { user: User }) {
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer"
-                onClick={() => {
-                  if (status === "loading") {
-                    toast({
-                      type: "error",
-                      description:
-                        "Checking authentication status, please try again!",
-                    });
-
-                    return;
-                  }
-
-                  if (isGuest) {
-                    router.push("/login");
-                  } else {
-                    signOut({
-                      redirectTo: "/",
-                    });
-                  }
-                }}
+                onClick={handleAuthAction}
                 type="button"
               >
                 {isGuest ? "Login to your account" : "Sign out"}
