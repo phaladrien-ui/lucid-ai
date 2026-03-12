@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -48,44 +48,25 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Utiliser un ref pour tracker si la modale a déjà été affichée
-  const hasShownLoginPrompt = useRef(false);
-
   // Déterminer le type d'utilisateur
   const isGuest = guestRegex.test(session?.user?.email ?? "");
 
-  // Afficher la modale UNE SEULE FOIS au chargement initial
+  // Afficher la modale automatiquement si l'utilisateur n'est pas connecté
   useEffect(() => {
-    // Ne rien faire pendant le chargement
     if (status === "loading") {
       return;
     }
 
-    // Si l'utilisateur n'est pas authentifié ET que la modale n'a pas encore été affichée
-    if (status === "unauthenticated" && !hasShownLoginPrompt.current) {
-      // Marquer que la modale a été affichée (même avant le setTimeout)
-      hasShownLoginPrompt.current = true;
-
+    // Si l'utilisateur n'est PAS authentifié, afficher la modale
+    if (status === "unauthenticated") {
+      // Petit délai pour éviter un flash de l'interface
       const timer = setTimeout(() => {
         setShowLoginPrompt(true);
       }, 300);
 
       return () => clearTimeout(timer);
     }
-
-    // Si l'utilisateur est authentifié, on réinitialise le flag pour une prochaine fois
-    if (status === "authenticated") {
-      hasShownLoginPrompt.current = false;
-    }
-  }, [status]); // Ne dépend que de status
-
-  // Réinitialiser le flag quand l'utilisateur se déconnecte
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      // Ne pas réinitialiser automatiquement, on garde le comportement existant
-      // hasShownLoginPrompt.current = false;
-    }
-  }, [status]);
+  }, [status]); // Se déclenche quand le statut d'authentification change
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -104,7 +85,6 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleContinueAsGuest = () => {
     setShowLoginPrompt(false);
-    // On garde hasShownLoginPrompt.current = true pour ne pas réafficher
   };
 
   const handleAuthAction = () => {
@@ -127,6 +107,7 @@ export function SidebarUserNav({ user }: { user: User }) {
     }
   };
 
+  // Déterminer l'email à afficher
   const displayEmail = () => {
     if (status === "loading") {
       return "Loading...";
@@ -140,6 +121,7 @@ export function SidebarUserNav({ user }: { user: User }) {
     return session?.user?.email || user?.email || "User";
   };
 
+  // Déterminer la source de l'avatar
   const avatarSrc = session?.user?.email
     ? `https://avatar.vercel.sh/${session.user.email}`
     : `https://avatar.vercel.sh/${user?.email || "default"}`;
@@ -214,6 +196,7 @@ export function SidebarUserNav({ user }: { user: User }) {
         </SidebarMenuItem>
       </SidebarMenu>
 
+      {/* Modale de confirmation de déconnexion */}
       <AlertDialog onOpenChange={setShowLogoutConfirm} open={showLogoutConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -231,6 +214,7 @@ export function SidebarUserNav({ user }: { user: User }) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Modale d'invitation à se connecter - s'affiche automatiquement */}
       <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
