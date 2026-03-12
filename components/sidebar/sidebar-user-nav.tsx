@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -19,6 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,8 +46,22 @@ export function SidebarUserNav({ user }: { user: User }) {
   const { data, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
+  const isAuthenticated = !isGuest && !!user;
+
+  // Afficher la modale si l'utilisateur n'est pas connecté
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!isAuthenticated) {
+      const timer = setTimeout(() => {
+        setShowLoginPrompt(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [status, isAuthenticated]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -50,6 +72,15 @@ export function SidebarUserNav({ user }: { user: User }) {
     signOut({ redirect: false }).then(() => {
       window.location.href = "/";
     });
+  };
+
+  const handleLoginRedirect = () => {
+    setShowLoginPrompt(false);
+    router.push("/login");
+  };
+
+  const handleContinueAsGuest = () => {
+    setShowLoginPrompt(false);
   };
 
   const handleAuthAction = () => {
@@ -140,8 +171,7 @@ export function SidebarUserNav({ user }: { user: User }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Sign out</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to sign out? You can always sign back in to
-              access your conversations.
+              Are you sure you want to sign out?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -152,6 +182,30 @@ export function SidebarUserNav({ user }: { user: User }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modale d'invitation à se connecter */}
+      <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Welcome back!</DialogTitle>
+            <DialogDescription>
+              You're browsing as a guest. Sign in to access your account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-4">
+            <Button className="w-full" onClick={handleLoginRedirect}>
+              Sign in
+            </Button>
+            <Button
+              className="w-full"
+              onClick={handleContinueAsGuest}
+              variant="outline"
+            >
+              Continue as guest
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
