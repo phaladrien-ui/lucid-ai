@@ -43,35 +43,37 @@ import { guestRegex } from "@/lib/constants";
 
 export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();
-  const { data, status } = useSession();
+  const { data: session, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const isGuest = guestRegex.test(data?.user?.email ?? "");
-  const isAuthenticated = !isGuest && !!user;
+  // Determine user type
+  const isGuest = guestRegex.test(session?.user?.email ?? "");
 
   // Afficher la modale si l'utilisateur n'est pas connecté
   useEffect(() => {
-    if (status === "loading") return;
+    if (status === "loading") {
+      return;
+    }
 
-    if (!isAuthenticated) {
+    // Show login prompt only for unauthenticated users (including guests)
+    if (status === "unauthenticated") {
       const timer = setTimeout(() => {
         setShowLoginPrompt(true);
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [status, isAuthenticated]);
+  }, [status]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
     setShowLogoutConfirm(false);
-    signOut({ redirect: false }).then(() => {
-      window.location.href = "/";
-    });
+    await signOut({ redirect: false });
+    window.location.href = "/";
   };
 
   const handleLoginRedirect = () => {
@@ -92,12 +94,38 @@ export function SidebarUserNav({ user }: { user: User }) {
       return;
     }
 
-    if (isGuest) {
-      router.push("/login");
+    if (status === "authenticated") {
+      if (isGuest) {
+        // Guest users can login to convert to real account
+        router.push("/login");
+      } else {
+        // Real authenticated users can logout
+        handleLogout();
+      }
     } else {
-      handleLogout();
+      // Unauthenticated users go to login
+      router.push("/login");
     }
   };
+
+  // Determine display email
+  const displayEmail = () => {
+    if (status === "loading") {
+      return "Loading...";
+    }
+    if (status === "unauthenticated") {
+      return "Not signed in";
+    }
+    if (isGuest) {
+      return "Guest";
+    }
+    return session?.user?.email || user?.email || "User";
+  };
+
+  // Determine avatar source
+  const avatarSrc = session?.user?.email
+    ? `https://avatar.vercel.sh/${session.user.email}`
+    : `https://avatar.vercel.sh/${user?.email || "default"}`;
 
   return (
     <>
@@ -123,14 +151,14 @@ export function SidebarUserNav({ user }: { user: User }) {
                   data-testid="user-nav-button"
                 >
                   <Image
-                    alt={user.email ?? "User Avatar"}
+                    alt={displayEmail()}
                     className="rounded-full"
                     height={24}
-                    src={`https://avatar.vercel.sh/${user.email}`}
+                    src={avatarSrc}
                     width={24}
                   />
                   <span className="truncate" data-testid="user-email">
-                    {isGuest ? "Guest" : user?.email}
+                    {displayEmail()}
                   </span>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
@@ -144,9 +172,9 @@ export function SidebarUserNav({ user }: { user: User }) {
               <DropdownMenuItem
                 className="cursor-pointer"
                 data-testid="user-nav-item-theme"
-                onSelect={() =>
-                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
-                }
+                onSelect={() => {
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark");
+                }}
               >
                 {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
               </DropdownMenuItem>
@@ -157,7 +185,11 @@ export function SidebarUserNav({ user }: { user: User }) {
                   onClick={handleAuthAction}
                   type="button"
                 >
-                  {isGuest ? "Login to your account" : "Sign out"}
+                  {status === "authenticated"
+                    ? isGuest
+                      ? "Login to your account"
+                      : "Sign out"
+                    : "Sign in"}
                 </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
