@@ -32,7 +32,7 @@ export function SidebarHeader({ user, onDeleteAll }: SidebarHeaderProps) {
         }}
       >
         <OrionLogo size={22} />
-        <span className="font-semibold text-lg tracking-tight">Orion</span>
+        <span className="font-semibold text-lg tracking-tight">Lucid Ai</span>
       </Link>
 
       <div className="flex items-center gap-1">
