@@ -8,7 +8,7 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Orion | Learn to code with AI ",
+  title: "Lucid AI | Learn to code with AI ",
   description: "Learn to code with AI",
 };
 
